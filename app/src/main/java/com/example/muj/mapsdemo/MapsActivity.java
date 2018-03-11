@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -179,20 +180,27 @@ public void onClick(View v){
         Toast.makeText(this,"Showing Nearby Hospitals",Toast.LENGTH_SHORT).show();
         break;
 
-            case R.id.B_to:mMap.clear();
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(end_latitude,end_longitude));
-                markerOptions.title("Destination");
-                markerOptions.draggable(true);
-
-                float results[] = new float[10];
-                Location.distanceBetween(latitude, longitude, end_latitude, end_longitude, results);
-                markerOptions.snippet("Distance = "+results[0]);
-                mMap.addMarker(markerOptions);
+            case R.id.B_to:
+                    dataTransfer = new  Object[3];
+                    url = getDirectionUrl();
+                    GetDirectionData getDirectionData = new GetDirectionData();
+                    dataTransfer[0] = mMap;
+                    dataTransfer[1] = url;
+                    dataTransfer[2] = new LatLng(end_latitude, end_longitude);
+                    getDirectionData.execute(dataTransfer);
                 break;
         }
         }
 
+        private String getDirectionUrl()
+        {
+                StringBuilder googleDirectionsUrl = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?");
+                googleDirectionsUrl.append("origin"+latitude+","+longitude);
+                googleDirectionsUrl.append("&destination"+end_latitude+","+longitude);
+                googleDirectionsUrl.append("&keys"+" AIzaSyDO-RQSBdrMpt-2gMsO1wQoTy2tYU10TXY ");
+
+                return googleDirectionsUrl.toString();
+        }
 private String getUrl(double latitude,double longitude,String nearbyPlace)
         {
         StringBuilder googlePlaceUrl=new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");

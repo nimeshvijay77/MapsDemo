@@ -1,5 +1,8 @@
 package com.example.muj.mapsdemo;
 
+import android.content.SyncRequest;
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +17,30 @@ import java.util.concurrent.locks.LockSupport;
  */
 
 public class DataParser {
+
+    private HashMap<String, String> getDuration(JSONArray googleDirectionsJson)
+    {
+        HashMap<String, String> googleDirectionMap = new HashMap<>();
+        String duration = "";
+        String distance = "";
+
+        Log.d("json response", googleDirectionsJson.toString());
+        try {
+
+            duration = googleDirectionsJson.getJSONObject(0).getJSONObject("duration").getString("text");
+            distance = googleDirectionsJson.getJSONObject(0).getJSONObject("distance").getString("text");
+            googleDirectionMap.put("duration", duration);
+            googleDirectionMap.put("distance", distance);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        return googleDirectionMap;
+    }
+
+
 
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson)
     {
@@ -81,6 +108,50 @@ public class DataParser {
                 e.printStackTrace();
             }
             return  getPlaces(jsonArray);
+        }
+
+        public  String[] parseDirections(String jsonData)
+        {
+            JSONArray jsonArray = null;
+            JSONObject jsonObject;
+
+            try {
+                jsonObject = new JSONObject(jsonData);
+                jsonArray = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONArray("legs").getJSONObject(0).getJSONArray("steps");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return getPaths(jsonArray);
+        }
+
+
+      public String[]  getPaths(JSONArray googleStepsJson)
+      {
+          int count = googleStepsJson.length();
+          String[] polylines = new String[count];
+
+          for (int i=0; i<count;i++ )
+          {
+              try {
+                  polylines[i]= getPath(googleStepsJson.getJSONObject(i));
+              } catch (JSONException e) {
+                  e.printStackTrace();
+              }
+          }
+          return polylines;
+      }
+
+
+        public String getPath(JSONObject googlePathJson )
+        {
+            String polyline ="";
+            try {
+                polyline = googlePathJson.getJSONObject("polyline").getString("points");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return polyline;
         }
     }
 
